@@ -1,16 +1,23 @@
    (function() {
-     const PASS = "Pflege123";
+     // === تنظیم رمز عبور ===
+     const PASS = "Pflege123";  // می‌توانید اینجا رمز خودتان را بنویسید
+
+     // درخواست رمز از کاربر
      const userPass = prompt("Bitte Passwort eingeben:");
+
+     // بررسی رمز
      if (userPass === PASS) {
+       // اگر درست باشد، بخش اصلی را نمایش بده
        document.getElementById("content").style.display = "block";
-       loadQuestions();
+       loadQuestions();  // بارگذاری سوالات
      } else {
+       // اگر غلط باشد، هشدار
        alert("Falsches Passwort! Zugriff verweigert.");
+       // صفحه دیگر باز نمی‌شود
      }
 
+     // تابع بارگذاری سوالات (فعلاً خالی؛ مرحله ۶ پر می‌شود)
      function loadQuestions() {
-       const quiz = document.getElementById("quizForm");
-       const questions = [ /* آرایه سوالات در اینجا */ ];
-       // … کد اضافه‌کردن سوالات به صورت داینامیک …
+       // در مرحله بعد اینجا آرایه 40 سوال درج می‌شود
      }
    })();
