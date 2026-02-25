@@ -1,0 +1,16 @@
+   body {
+     font-family: Arial, sans-serif;
+     background: #f4f4f4;
+     color: #333;
+     margin: 0; padding: 20px;
+   }
+   h1 { text-align: center; }
+   fieldset {
+     margin: 15px 0;
+     padding: 10px;
+     background: #fff;
+     border: 1px solid #ccc;
+   }
+   legend { font-weight: bold; }
+   label { display: block; margin: 5px 0; }
+   button { display: block; margin: 20px auto; padding: 10px 20px; }
