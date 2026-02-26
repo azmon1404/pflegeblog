@@ -1,15 +1,162 @@
-   <!DOCTYPE html>
-   <html lang="de">
-   <head>
-     <meta charset="UTF-8">
-     <title>Pflege-Quiz</title>
-     <link rel="stylesheet" href="style.css">
-   </head>
-   <body>
-      <script src="script.js"></script>
-     <div id="content" style="display: none;">
-       <h1>Pflege-Quiz: 40 Fragen</h1>
-       <form id="quizForm"></form>
-     </div>
-   </body>
-   </html>
+
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <title>آزمون پرستاری</title>
+  <style>
+    body { font-family: Tahoma, sans-serif; margin: 20px; }
+    #login, #quiz { max-width: 600px; margin: auto; }
+    h2 { text-align: center; }
+    .question { margin: 15px 0; padding: 10px; border: 1px solid #ccc; border-radius: 5px; }
+    .options label { display: block; margin: 5px 0; cursor: pointer; }
+    #submitBtn { display: block; margin: 20px auto; padding: 10px 20px; }
+    #result { text-align: center; font-size: 1.2em; margin-top: 15px; }
+  </style>
+</head>
+<body>
+
+<div id="login">
+  <h2>ورود به آزمون پرستاری</h2>
+  <input id="password" type="password" placeholder="رمز عبور" style="width:100%;padding:10px;">
+  <button id="loginBtn" style="width:100%;padding:10px;margin-top:10px;">ورود</button>
+  <p id="error" style="color:red;text-align:center;"></p>
+</div>
+
+<div id="quiz" style="display:none;">
+  <h2>آزمون پرستاری (۴۰ سوال)</h2>
+  <form id="quizForm">
+    <div id="questions"></div>
+    <button type="button" id="submitBtn">ارسال پاسخ‌ها</button>
+  </form>
+  <div id="result"></div>
+</div>
+
+<script>
+  const PASSWORD = "1234";  // ← رمز عبور را اینجا تغییر دهید
+
+  const quizData = [
+    { question: "۱. دمای طبیعی بدن بزرگسال چند درجه سلسیوس است؟",
+      options: { a: "34-35", b: "35-36", c: "36-37", d: "37-38" }, correct: "c" },
+    { question: "۲. کدام علامت جزو نشانه‌های شوک هیپوولمیک است؟",
+      options: { a: "افزایش فشار خون", b: "کاهش ضربان قلب", c: "افزایش تعریق", d: "شل شدن مردمک‌ها" }, correct: "c" },
+    { question: "۳. محل تزریق عضلانی ونتروگلوتئال برای بزرگسالان بهتر است؟",
+      options: { a: "دیلتوئید", b: "وترسال خلفی", c: "وترسال قدامی", d: "گلوتئال میانی" }, correct: "d" },
+    { question: "۴. تست گلوکز خون سرپایی برای تشخیص دیابت چه مقدار است؟",
+      options: { a: "<100 mg/dL", b: "100-125 mg/dL", c: "126-200 mg/dL", d: ">200 mg/dL" }, correct: "b" },
+    { question: "۵. هدف اولیه پانسمان استریل چیست؟",
+      options: { a: "جلوگیری از عفونت", b: "کاهش درد", c: "جلوگیری از خونریزی", d: "زیبایی" }, correct: "a" },
+    { question: "۶. در مراقبت از کاتتر ادراری، هر چند روز یک‌بار باید تعویض کیسه جمع‌آوری شود؟",
+      options: { a: "هر روز", b: "هر ۳ روز", c: "هر هفته", d: "هر ماه" }, correct: "b" },
+    { question: "۷. نمره چشم در نوار GCS چند است؟",
+      options: { a: "1-2", b: "1-3", c: "1-4", d: "1-5" }, correct: "c" },
+    { question: "۸. علامت زیر برای سندرم کمپارتمان نشانه‌ای از چیست؟",
+      options: { a: "افزایش حساسیت", b: "کاهش فشار", c: "کاهش درد", d: "رنگ‌پریدگی" }, correct: "a" },
+    { question: "۹. بهترین راه پیشگیری از عفونت بیمارستانی چیست؟",
+      options: { a: "آنتی‌بیوتیک تراپی", b: "شستشوی دست", c: "پانسمان مداوم", d: "استفاده از دستکش" }, correct: "b" },
+    { question: "۱۰. کدام شاخص برای سنجش وضعیت تغذیه درازمدت مناسب‌تر است؟",
+      options: { a: "گلوبولین", b: "آلبومین", c: "گلیکو هموگلوبین", d: "تری‌گلیسیرید" }, correct: "b" },
+    { question: "۱۱. کدام علامت از تشنج تونیک-کلونیک حکایت دارد؟",
+      options: { a: "پرش‌های موضعی", b: "شل شدن بدن", c: "اسپاسم پیوسته", d: "از دست دادن هوشیاری" }, correct: "d" },
+    { question: "۱۲. محل مناسب برای گرفتن نبض کاروتید است؟",
+      options: { a: "مچ دست", b: "گردن", c: "آخِر کتف", d: "کشاله ران" }, correct: "b" },
+    { question: "۱۳. علامت چرخش چشم (سونگال) در کجا دیده می‌شود؟",
+      options: { a: "آسیب مغزی", b: "فلج بل", c: "میگرن", d: "سردرد خوشه‌ای" }, correct: "a" },
+    { question: "۱۴. در کدام مرحله GCS بیمار چشم‌هایش را فقط به صدا باز می‌کند؟",
+      options: { a: "مرحله صحبت", b: "مرحله درد", c: "مرحله صدا", d: "مرحله خودبه‌خودی" }, correct: "c" },
+    { question: "۱۵. ترجیحاً سرعت تزریق وریدی نباید از چند میلی‌لیتر در ساعت بیشتر باشد؟",
+      options: { a: "20", b: "40", c: "60", d: "80" }, correct: "c" },
+    { question: "۱۶. کدام‌یک از علائم شکستگی استخوان ران است؟",
+      options: { a: "کوتاهی اندام", b: "تورم زانو", c: "درد آرنج", d: "ترک خوردن پوست" }, correct: "a" },
+    { question: "۱۷. بهترین راه علامت‌گذاری برای جلوگیری از خطای دارویی چیست؟",
+      options: { a: "دستی نوشتن", b: "بارکد خوان", c: "پروتکل شفاهی", d: "بند پلاستیکی" }, correct: "b" },
+    { question: "۱۸. محل تزریق زیرجلدی انسولین چیست؟",
+      options: { a: "واحد جلوی ران", b: "دیلتوئید", c: "میانه شکم", d: "کفل" }, correct: "c" },
+    { question: "۱۹. هنگام نوار قلب، الکترود V1 در کجا قرار می‌گیرد؟",
+      options: { a: "سومین فاصله فضای بین‌دنده‌ای راست", b: "پنجمین فاصله چپ", c: "چهارمین فاصله راست", d: "چهارمین فاصله چپ" }, correct: "a" },
+    { question: "۲۰. کدام روش برای کنترل خونریزی شریانی توصیه می‌شود؟",
+      options: { a: "بانداژ فشاری", b: "بالا بردن اندام", c: "تلمبه زدن", d: "گرما دادن" }, correct: "a" },
+    { question: "۲۱. علامت هانتینگتون در کدام سیستم عصبی است؟",
+      options: { a: "سمپاتیک", b: "پاراسمپاتیک", c: "حرکتی ارادی", d: "حرکتی غیرارادی" }, correct: "d" },
+    { question: "۲۲. کدام مورد در مراقبت از زخم بستری نباید نادیده گرفته شود؟",
+      options: { a: "عوض کردن مداوم پانسمان", b: "خشک نگه داشتن زخم", c: "تماس مداوم دستکش", d: "روشول تزریقی" }, correct: "a" },
+    { question: "۲۳. بهترین جایگزین تغذیه‌ای برای بیمار بدون توان دهانی چیست؟",
+      options: { a: "پانکراژن", b: "EN via NGT", c: "TPN", d: "حبوبات له‌شده" }, correct: "b" },
+    { question: "۲۴. داروی ضدانعقاد معمولاً کدام است؟",
+      options: { a: "هپارین", b: "آموکسی‌سیلین", c: "متفورمین", d: "دیازپام" }, correct: "a" },
+    { question: "۲۵. علامت کوشینگ چیست؟",
+      options: { a: "کاهش فشار خون", b: "پف صورت", c: "کبودی پوست", d: "لاغری موضعی" }, correct: "b" },
+    { question: "۲۶. کدام روش برای سنجش میزان اشباع اکسیژن است؟",
+      options: { a: "رادیوگرافی", b: "پالس اکسی‌متری", c: "EKG", d: "اسپیرومتری" }, correct: "b" },
+    { question: "۲۷. در سندرم نفروتیک، چه علامتی شایع است؟",
+      options: { a: "پروتئینوری", b: "هموگلوبین بالا", c: "کراتینین پائین", d: "لکوسیتوز" }, correct: "a" },
+    { question: "۲۸. بهترین محل تزریق عضلانی کودکان زیر ۷ ماه چیست؟",
+      options: { a: "دیلتوئید", b: "وترسال خلفی", c: "وترسال قدامی", d: "گلوتئال میانی" }, correct: "c" },
+    { question: "۲۹. علامت کلیکس در معاینه ریه چیست؟",
+      options: { a: "صدای خز", b: "رفرکتوری", c: "رفلکس", d: "رزونانس" }, correct: "a" },
+    { question: "۳۰. کدام مورد برای پیشگیری از DVT در بیماران بستری توصیه می‌شود؟",
+      options: { a: "استراحت مطلق", b: "جوراب واریس", c: "مایعات کم", d: "تجویز داروی ضدسرفه" }, correct: "b" },
+    { question: "۳۱. در مراقبت از بیمار ICU، کدام پارامتر حیاتی مهم‌تر است؟",
+      options: { a: "فشار داخل چشمی", b: "پ م پ مغزی", c: "جی‌سی‌اس", d: "نفوذپذیری پوستی" }, correct: "c" },
+    { question: "۳۲. علامت بارلو در چه بیماری دیده می‌شود؟",
+      options: { a: "آرتریت روماتوئید", b: "سفتی میوپاتی", c: "دیسک کمر", d: "شانه یخ‌زده" }, correct: "d" },
+    { question: "۳۳. کدام دارو برای کنترل حمله حاد آسم مناسب است؟",
+      options: { a: "سالبتامول اسپری", b: "ایندرال", c: "متوپرولول", d: "وراپامیل" }, correct: "a" },
+    { question: "۳۴. کدام تست برای بررسی عملکرد کلیوی است؟",
+      options: { a: "AST/ALT", b: "Cr و BUN", c: "CPK", d: "T3/T4" }, correct: "b" },
+    { question: "۳۵. در پرستاری سالمندان، توجه ویژه به کدام مورد ضرورت دارد؟",
+      options: { a: "تغییر مداوم تخت", b: "ارزیابی سقوط", c: "به‌کارگیری صدا", d: "مصرف زیاد مایعات" }, correct: "b" },
+    { question: "۳۶. کدام علامت نشان‌دهنده دیسترس تنفسی است؟",
+      options: { a: "برونشوسپاسم", b: "رفلکس سرفه", c: "تورم صورت", d: "وضعیت شوک" }, correct: "a" },
+    { question: "۳۷. محل مناسب برای پایش فشار شریانی در کنترل دقیق چیست؟",
+      options: { a: "مچ دست", b: "بازو", c: "کشاله ران", d: "ناحیه تیبیا" }, correct: "b" },
+    { question: "۳۸. بهترین اقدام در صورت خارج شدن کاتتر مرکزی از محلش چیست؟",
+      options: { a: "فشار و پانسمان", b: "تزریق محلول نمکی", c: "بستن سرسوزن", d: "تخلیه محل" }, correct: "a" },
+    { question: "۳۹. کدام مورد در بیمار با خونریزی گوارشی مهم است؟",
+      options: { a: "ناشتا بودن", b: "تجویز آنتی‌بیوتیک", c: "استحمام", d: "سلفون کردن شکم" }, correct: "a" },
+    { question: "۴۰. تست Allen برای چیست؟",
+      options: { a: "جریان خون کاروتید", b: "جریان خون داخلی ران", c: "جریان خون رادیال و اولنار", d: "جریان خون پا" }, correct: "c" }
+  ];
+
+  // نمایش سوالات
+  function initQuiz() {
+    const container = document.getElementById("questions");
+    quizData.forEach((item, index) => {
+      const qDiv = document.createElement("div");
+      qDiv.className = "question";
+      let html = `<p>${item.question}</p><div class="options">`;
+      for (let key in item.options) {
+        html += `<label><input type="radio" name="q${index}" value="${key}"> (${key.toUpperCase()}) ${item.options[key]}</label>`;
+      }
+      html += `</div>`;
+      qDiv.innerHTML = html;
+      container.appendChild(qDiv);
+    });
+  }
+
+  // ورود
+  document.getElementById("loginBtn").addEventListener("click", () => {
+    const pass = document.getElementById("password").value;
+    if (pass === PASSWORD) {
+      document.getElementById("login").style.display = "none";
+      document.getElementById("quiz").style.display = "block";
+      initQuiz();
+    } else {
+      document.getElementById("error").textContent = "رمز عبور اشتباه است.";
+    }
+  });
+
+  // ارسال پاسخ‌ها و محاسبه نمره
+  document.getElementById("submitBtn").addEventListener("click", () => {
+    let score = 0;
+    quizData.forEach((item, i) => {
+      const ans = document.querySelector(`input[name="q${i}"]:checked`);
+      if (ans && ans.value === item.correct) score++;
+    });
+    document.getElementById("result").textContent = 
+      `امتیاز شما: ${score} از ${quizData.length}`;
+  });
+</script>
+
+</body>
+</html>
